@@ -1,0 +1,54 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.devopsmonk'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// Run any chapter with: ./gradlew run -PmainClass=com.devopsmonk.java8.ch03_lambdas.LambdaExamples
+application {
+    mainClass = project.findProperty('mainClass') ?: 'com.devopsmonk.java8.ch03_lambdas.LambdaExamples'
+}
+
+// Convenience tasks — one per chapter
+['ch03_lambdas.LambdaExamples',
+ 'ch04_functional.FunctionalInterfaceExamples',
+ 'ch05_methodrefs.MethodReferenceExamples',
+ 'ch06_streams.StreamBasicsExamples',
+ 'ch07_streams_advanced.StreamAdvancedExamples',
+ 'ch08_parallel.ParallelStreamExamples',
+ 'ch09_optional.OptionalExamples',
+ 'ch10_datetime.DateTimeExamples',
+ 'ch11_interfaces.DefaultStaticMethodExamples',
+ 'ch12_collections.CollectionMapExamples',
+ 'ch13_async.CompletableFutureExamples',
+ 'ch14_newapis.NewApisExamples',
+ 'ch15_jvm.JvmImprovementsExamples',
+ 'ch16_bestpractices.BestPracticesExamples'
+].each { cls ->
+    def taskName = 'run' + cls.split('\\.')[1]
+    tasks.register(taskName, JavaExec) {
+        group = 'java8-tutorial'
+        description = "Run ${cls}"
+        classpath = sourceSets.main.runtimeClasspath
+        mainClass = "com.devopsmonk.java8.${cls}"
+    }
+}
