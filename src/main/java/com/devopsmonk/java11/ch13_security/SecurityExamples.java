@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.*;
 import java.util.Base64;
-import java.util.HexFormat;
 
 /**
  * Chapter 13 — Security: TLS 1.3, ChaCha20, Curve25519 (JEP 329, 332, 324)
@@ -97,7 +96,7 @@ public class SecurityExamples {
             try {
                 MessageDigest md = MessageDigest.getInstance(alg);
                 byte[] hash = md.digest(data);
-                String hex = HexFormat.of().formatHex(hash);
+                String hex = toHex(hash);
                 System.out.printf("  %-12s  %s%n", alg, hex.substring(0, Math.min(hex.length(), 64)) + "...");
             } catch (NoSuchAlgorithmException e) {
                 System.out.printf("  %-12s  NOT AVAILABLE%n", alg);
@@ -234,8 +233,8 @@ public class SecurityExamples {
             bobKA.doPhase(aliceKP.getPublic(), true);
             byte[] bobSecret = bobKA.generateSecret();
 
-            System.out.println("  Alice secret: " + HexFormat.of().formatHex(aliceSecret).substring(0, 32) + "...");
-            System.out.println("  Bob secret:   " + HexFormat.of().formatHex(bobSecret).substring(0, 32) + "...");
+            System.out.println("  Alice secret: " + toHex(aliceSecret).substring(0, 32) + "...");
+            System.out.println("  Bob secret:   " + toHex(bobSecret).substring(0, 32) + "...");
             System.out.println("  Secrets match: " + MessageDigest.isEqual(aliceSecret, bobSecret));
             System.out.println("  → Both can now derive the same AES key without ever sharing it");
 
@@ -327,5 +326,14 @@ public class SecurityExamples {
                 System.out.println("    " + alg.strip());
             }
         }
+    }
+
+    // HexFormat was added in Java 17 — this helper works on Java 11
+    private static String toHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
     }
 }

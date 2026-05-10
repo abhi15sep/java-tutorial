@@ -12,7 +12,7 @@ import java.util.List;
  * Java 11 added convenience methods to Files and InputStream:
  *   Files.readString(Path)              — read a whole file into a String
  *   Files.writeString(Path, String)     — write a String to a file
- *   Files.mismatch(Path, Path)          — find byte position of first difference
+ *   Files.mismatch(Path, Path)          — find byte position of first difference (Java 12; implemented manually here)
  *   Path.of(String)                     — clean alternative to Paths.get()
  *   InputStream.readAllBytes()          — read all bytes from any stream
  *   InputStream.readNBytes(n)           — read exactly n bytes
@@ -141,11 +141,11 @@ public class FilesIoExamples {
         Files.writeString(fileC, "Hello, Java  11!");  // extra space at pos 12
 
         // Returns -1 when files are identical
-        long identical = Files.mismatch(fileA, fileB);
+        long identical = mismatch(fileA, fileB);
         System.out.println("  A vs B (identical): " + identical);  // -1
 
         // Returns byte position of first difference
-        long diffPos = Files.mismatch(fileA, fileC);
+        long diffPos = mismatch(fileA, fileC);
         System.out.println("  A vs C (differ at byte): " + diffPos);
 
         // Show what's at that position
@@ -246,7 +246,7 @@ public class FilesIoExamples {
         }
 
         // Compare two months for drift
-        long mismatch = Files.mismatch(jan, feb);
+        long mismatch = mismatch(jan, feb);
         System.out.println("  jan vs feb differ at byte: " + mismatch);
 
         // Cleanup
@@ -256,5 +256,16 @@ public class FilesIoExamples {
         Files.deleteIfExists(dir);
 
         System.out.println();
+    }
+
+    // Files.mismatch() was added in Java 12 — this helper replicates it for Java 11
+    private static long mismatch(Path a, Path b) throws IOException {
+        byte[] bytesA = Files.readAllBytes(a);
+        byte[] bytesB = Files.readAllBytes(b);
+        int len = Math.min(bytesA.length, bytesB.length);
+        for (int i = 0; i < len; i++) {
+            if (bytesA[i] != bytesB[i]) return i;
+        }
+        return bytesA.length == bytesB.length ? -1L : len;
     }
 }
