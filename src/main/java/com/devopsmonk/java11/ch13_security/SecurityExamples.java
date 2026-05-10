@@ -189,9 +189,10 @@ public class SecurityExamples {
             System.out.println("  Plaintext:  " + plaintext);
             System.out.println("  Ciphertext: " + Base64.getEncoder().encodeToString(ciphertext));
 
-            // Decrypt
-            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(nonce));
-            String decrypted = new String(cipher.doFinal(ciphertext), StandardCharsets.UTF_8);
+            // Decrypt — must use a new Cipher instance; ChaCha20 forbids key+nonce reuse
+            Cipher decipher = Cipher.getInstance("ChaCha20-Poly1305");
+            decipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(nonce));
+            String decrypted = new String(decipher.doFinal(ciphertext), StandardCharsets.UTF_8);
             System.out.println("  Decrypted:  " + decrypted);
 
         } catch (NoSuchAlgorithmException e) {
