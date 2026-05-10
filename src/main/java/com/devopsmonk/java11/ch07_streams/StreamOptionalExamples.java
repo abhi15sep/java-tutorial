@@ -1,6 +1,7 @@
 package com.devopsmonk.java11.ch07_streams;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.*;
 
 /**
@@ -150,38 +151,39 @@ public class StreamOptionalExamples {
     static void collectorsFiltering() {
         System.out.println("--- 4. Collectors.filtering / flatMapping ---");
 
-        record Employee(String name, String dept, int salary) {}
+        // Using String[] arrays as lightweight tuples [name, dept, salary]
         var employees = List.of(
-                new Employee("Alice", "ENG",   95000),
-                new Employee("Bob",   "PROD",  82000),
-                new Employee("Carol", "ENG",   91000),
-                new Employee("Dave",  "ENG",   75000),
-                new Employee("Eve",   "PROD",  88000)
+                new String[]{"Alice", "ENG",  "95000"},
+                new String[]{"Bob",   "PROD", "82000"},
+                new String[]{"Carol", "ENG",  "91000"},
+                new String[]{"Dave",  "ENG",  "75000"},
+                new String[]{"Eve",   "PROD", "88000"}
         );
 
         // Collectors.filtering — filter INSIDE a downstream collector
         // Use case: groupBy with filtering per group (vs filtering the whole stream first)
         var highEarnersByDept = employees.stream()
                 .collect(Collectors.groupingBy(
-                        Employee::dept,
-                        Collectors.filtering(e -> e.salary() > 85_000,
-                                Collectors.mapping(Employee::name, Collectors.toList()))
+                        e -> e[1],
+                        Collectors.filtering(e -> Integer.parseInt(e[2]) > 85_000,
+                                Collectors.mapping(e -> e[0], Collectors.toList()))
                 ));
         System.out.println("  High earners by dept (>£85k): " + highEarnersByDept);
 
         // Collectors.flatMapping — flatMap inside a downstream collector
-        record Team(String name, List<String> members) {}
-        var teams = List.of(
-                new Team("Backend",  List.of("Alice", "Dave")),
-                new Team("Frontend", List.of("Bob", "Carol")),
-                new Team("DevOps",   List.of("Eve"))
-        );
+        // teams: String[][] where [0]=name, [1..]=members
+        var teamBackend  = new Object[]{"Backend",  List.of("Alice", "Dave")};
+        var teamFrontend = new Object[]{"Frontend", List.of("Bob", "Carol")};
+        var teamDevOps   = new Object[]{"DevOps",   List.of("Eve")};
+        var teams = List.of(teamBackend, teamFrontend, teamDevOps);
 
         // All members, grouped by first letter of team name
+        @SuppressWarnings("unchecked")
         var membersByTeamInitial = teams.stream()
                 .collect(Collectors.groupingBy(
-                        t -> t.name().charAt(0),
-                        Collectors.flatMapping(t -> t.members().stream(), Collectors.toList())
+                        t -> ((String) t[0]).charAt(0),
+                        Collectors.flatMapping(t -> ((List<String>) t[1]).stream(),
+                                Collectors.toList())
                 ));
         System.out.println("  Members by team initial: " + membersByTeamInitial);
 

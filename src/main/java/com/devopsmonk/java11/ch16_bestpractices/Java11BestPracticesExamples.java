@@ -197,14 +197,9 @@ public class Java11BestPracticesExamples {
         String bordered = "=" .repeat(title.length()) + "\n" + title + "\n" + "=".repeat(title.length());
         System.out.println("  " + bordered.replace("\n", "\n  "));
 
-        // ✓ Use text blocks for multi-line literals (Java 15, but shown here)
-        String json = """
-                {
-                    "name": "Alice",
-                    "version": "11"
-                }
-                """;
-        System.out.println("  Text block JSON (" + json.lines().count() + " lines)");
+        // ✓ Use text blocks for multi-line literals (Java 15+ feature)
+        String json = "{\n    \"name\": \"Alice\",\n    \"version\": \"11\"\n}\n";
+        System.out.println("  Multi-line JSON (" + json.lines().count() + " lines)");
 
         // ✓ Use String.join / Collectors.joining for building delimited strings
         var names = List.of("Alice", "Bob", "Carol");

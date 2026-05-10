@@ -2,6 +2,7 @@ package com.devopsmonk.java8.ch14_newapis;
 
 import java.util.Base64;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.concurrent.locks.StampedLock;
 

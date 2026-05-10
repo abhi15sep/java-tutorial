@@ -186,7 +186,7 @@ public class MethodReferenceExamples {
         // Collecting with method references
         Map<String, Double> salaryByName = employees.stream()
                 .collect(Collectors.toMap(Employee::getName, Employee::getSalary));
-        System.out.println("Alice's salary: £" + (int) salaryByName.get("Alice Chen"));
+        System.out.println("Alice's salary: £" + salaryByName.get("Alice Chen").intValue());
 
         // Sorting with chained method reference comparators
         employees.stream()

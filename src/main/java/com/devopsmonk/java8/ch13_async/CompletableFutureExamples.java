@@ -204,7 +204,7 @@ public class CompletableFutureExamples {
 
         // exceptionally — provide a fallback value when the future fails
         CompletableFuture<String> withFallback = CompletableFuture
-                .supplyAsync(() -> { throw new RuntimeException("Service down"); })
+                .<String>supplyAsync(() -> { throw new RuntimeException("Service down"); })
                 .exceptionally(ex -> "fallback-value (error: " + ex.getMessage() + ")");
         System.out.println("exceptionally: " + withFallback.get());
 

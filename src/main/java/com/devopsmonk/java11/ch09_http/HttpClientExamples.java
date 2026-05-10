@@ -118,7 +118,7 @@ public class HttpClientExamples {
             System.out.println("  Body (first 200 chars):");
             System.out.println("    " + body.substring(0, Math.min(body.length(), 200)));
 
-        } catch (java.net.ConnectException | java.io.IOException e) {
+        } catch (java.io.IOException e) {
             System.out.println("  [offline demo] GET request — would return HTTP 200 with JSON body");
             System.out.println("  Status: 200, Body: {\"url\": \"https://httpbin.org/get?name=Alice\", ...}");
         } catch (InterruptedException e) {
@@ -164,13 +164,11 @@ public class HttpClientExamples {
     static void postWithBody() {
         System.out.println("--- 4. POST with JSON body ---");
 
-        String jsonBody = """
-                {
-                    "name": "Alice",
-                    "department": "Engineering",
-                    "salary": 95000
-                }
-                """;
+        String jsonBody = "{\n" +
+                "    \"name\": \"Alice\",\n" +
+                "    \"department\": \"Engineering\",\n" +
+                "    \"salary\": 95000\n" +
+                "}\n";
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://httpbin.org/post"))
@@ -220,13 +218,15 @@ public class HttpClientExamples {
 
         // Fire all requests at once — they run concurrently
         List<CompletableFuture<String>> futures = urls.stream()
-                .map(url -> HttpRequest.newBuilder()
-                        .uri(URI.create(url))
-                        .timeout(Duration.ofSeconds(8))
-                        .build())
-                .map(req -> CLIENT.sendAsync(req, BodyHandlers.ofString())
-                        .thenApply(r -> r.statusCode() + " " + url)
-                        .exceptionally(ex -> "OFFLINE " + url))
+                .map(url -> {
+                    HttpRequest req = HttpRequest.newBuilder()
+                            .uri(URI.create(url))
+                            .timeout(Duration.ofSeconds(8))
+                            .build();
+                    return CLIENT.<String>sendAsync(req, BodyHandlers.ofString())
+                            .thenApply(r -> r.statusCode() + " " + url)
+                            .exceptionally(ex -> "OFFLINE " + url);
+                })
                 .collect(Collectors.toList());
 
         // Wait for all

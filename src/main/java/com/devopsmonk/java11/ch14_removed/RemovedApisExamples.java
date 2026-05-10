@@ -1,11 +1,7 @@
 package com.devopsmonk.java11.ch14_removed;
 
-import jakarta.xml.bind.*;
-import javax.xml.parsers.*;
 import java.io.StringReader;
 import java.util.*;
-import java.util.logging.*;
-import org.xml.sax.InputSource;
 
 /**
  * Chapter 14 — Removed and Deprecated APIs: Java EE Modules, JavaFX, Nashorn
@@ -53,61 +49,37 @@ public class RemovedApisExamples {
     // -------------------------------------------------------------------------
     // 1. JAXB Migration — xml.bind removed in Java 11
     // -------------------------------------------------------------------------
-    @XmlRootElement(name = "employee")
-    @XmlAccessorType(XmlAccessType.FIELD)
-    static class Employee {
-        @XmlAttribute long id;
-        @XmlElement  String name;
-        @XmlElement  String department;
-        @XmlElement  double salary;
-
-        Employee() {}
-        Employee(long id, String name, String department, double salary) {
-            this.id = id; this.name = name;
-            this.department = department; this.salary = salary;
-        }
-        @Override public String toString() {
-            return String.format("Employee{id=%d, name='%s', dept='%s', salary=%.0f}",
-                    id, name, department, salary);
-        }
-    }
-
-    static void jaxbMigration() throws Exception {
+    static void jaxbMigration() {
         System.out.println("--- 1. JAXB Migration ---");
 
         System.out.println(
-            "  Before Java 11: JAXB was bundled in java.xml.bind module.\n" +
-            "  Java 11+: add to build.gradle:\n" +
+            "  Before Java 11: JAXB was bundled in java.xml.bind module (no dependency needed).\n" +
+            "  Java 11+: must add an explicit dependency.\n\n" +
+            "  Add to build.gradle:\n" +
             "    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'\n" +
             "    runtimeOnly    'com.sun.xml.bind:jaxb-impl:4.0.5'\n\n" +
-            "  Package rename: javax.xml.bind.* → jakarta.xml.bind.*\n"
+            "  Import rename: javax.xml.bind.* → jakarta.xml.bind.*\n\n" +
+            "  Example (with dependency on classpath):\n" +
+            "    @XmlRootElement(name = \"employee\")\n" +
+            "    class Employee {\n" +
+            "        @XmlAttribute long id;\n" +
+            "        @XmlElement   String name;\n" +
+            "    }\n" +
+            "    // Marshal:\n" +
+            "    JAXBContext ctx = JAXBContext.newInstance(Employee.class);\n" +
+            "    Marshaller m = ctx.createMarshaller();\n" +
+            "    m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);\n" +
+            "    m.marshal(employee, System.out);\n" +
+            "    // Output: <employee id=\"1\"><name>Alice</name></employee>\n"
         );
 
+        // Verify JAXB availability via reflection (no compile-time dependency needed)
         try {
-            // Marshal (Java object → XML)
-            var employee = new Employee(1, "Alice", "Engineering", 95000);
-            JAXBContext ctx = JAXBContext.newInstance(Employee.class);
-
-            java.io.StringWriter sw = new java.io.StringWriter();
-            Marshaller marshaller = ctx.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            marshaller.marshal(employee, sw);
-            String xml = sw.toString();
-
-            System.out.println("  Marshalled XML:");
-            xml.lines().forEach(l -> System.out.println("    " + l));
-
-            // Unmarshal (XML → Java object)
-            Unmarshaller unmarshaller = ctx.createUnmarshaller();
-            Employee restored = (Employee) unmarshaller.unmarshal(new StringReader(xml));
-            System.out.println("  Unmarshalled: " + restored);
-
-        } catch (ClassNotFoundException | JAXBException e) {
-            System.out.println("  [JAXB not on classpath — add dependency to build.gradle]");
-            System.out.println("  When present: marshal/unmarshal works identically to Java 8");
-            System.out.println("  Only difference: change import javax.xml.bind.* → jakarta.xml.bind.*");
-        } catch (Exception e) {
-            System.out.println("  JAXB demo: " + e.getMessage());
+            Class.forName("jakarta.xml.bind.JAXBContext");
+            System.out.println("  jakarta.xml.bind.JAXBContext is on the classpath ✓");
+        } catch (ClassNotFoundException e) {
+            System.out.println("  jakarta.xml.bind.JAXBContext not found — add dependency to build.gradle");
+            System.out.println("  This is expected when running without the JAXB dependency.");
         }
 
         System.out.println();
@@ -238,12 +210,13 @@ public class RemovedApisExamples {
         // Demonstrate StackWalker (replaces sun.reflect.Reflection.getCallerClass())
         System.out.println("  StackWalker (replaces sun.reflect.Reflection.getCallerClass()):");
         StackWalker walker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
-        walker.walk(frames -> frames
-                .limit(3)
-                .map(f -> "    " + f.getClassName() + "." + f.getMethodName()
-                        + ":" + f.getLineNumber())
-                .forEach(System.out::println)
-        );
+        walker.walk(frames -> {
+            frames.limit(3)
+                  .map(f -> "    " + f.getClassName() + "." + f.getMethodName()
+                          + ":" + f.getLineNumber())
+                  .forEach(System.out::println);
+            return null;
+        });
 
         System.out.println();
     }

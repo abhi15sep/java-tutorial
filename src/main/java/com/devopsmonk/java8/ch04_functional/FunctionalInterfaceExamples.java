@@ -192,7 +192,7 @@ public class FunctionalInterfaceExamples {
         // UnaryOperator<T> — same type in and out (specialisation of Function<T,T>)
         UnaryOperator<String> shout = s -> s.toUpperCase() + "!";
         UnaryOperator<String> trim  = String::trim;
-        UnaryOperator<String> clean = trim.andThen(shout);   // compose via andThen
+        UnaryOperator<String> clean = s -> shout.apply(trim.apply(s));  // compose manually (andThen on UnaryOperator returns Function, not UnaryOperator)
 
         System.out.println(clean.apply("  hello world  "));
 

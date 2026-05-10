@@ -136,14 +136,13 @@ public class ToolingExamples {
 
         // Demo: write a single-file Java program to disk and run it
         Path tempScript = Files.createTempFile("Hello", ".java");
-        Files.writeString(tempScript, """
-                public class Hello {
-                    public static void main(String[] args) {
-                        System.out.println("Hello from a single-file Java program!");
-                        System.out.println("Java version: " + System.getProperty("java.version"));
-                    }
-                }
-                """);
+        Files.writeString(tempScript,
+                "public class Hello {\n" +
+                "    public static void main(String[] args) {\n" +
+                "        System.out.println(\"Hello from a single-file Java program!\");\n" +
+                "        System.out.println(\"Java version: \" + System.getProperty(\"java.version\"));\n" +
+                "    }\n" +
+                "}\n");
 
         System.out.println("  Running single-file program: " + tempScript.getFileName());
         ProcessBuilder pb = new ProcessBuilder("java", tempScript.toString());
