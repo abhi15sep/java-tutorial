@@ -7,8 +7,21 @@ group = 'com.devopsmonk'
 version = '1.0.0'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+// ch08 (pattern switch) uses --enable-preview since JEP 406 is a Java 17 preview
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ['--enable-preview']
+}
+
+tasks.withType(JavaExec).configureEach {
+    jvmArgs '--enable-preview'
+}
+
+tasks.withType(Test).configureEach {
+    jvmArgs '--enable-preview'
 }
 
 repositories {
@@ -50,6 +63,29 @@ application {
         description = "Run Java 8 ${cls}"
         classpath = sourceSets.main.runtimeClasspath
         mainClass = "com.devopsmonk.java8.${cls}"
+    }
+}
+
+// Java 17 chapters
+['ch03_textblocks.TextBlockExamples',
+ 'ch04_records.RecordExamples',
+ 'ch05_pattern_instanceof.PatternInstanceofExamples',
+ 'ch06_switch_expressions.SwitchExpressionExamples',
+ 'ch07_sealed_classes.SealedClassExamples',
+ 'ch08_pattern_switch_preview.PatternSwitchPreviewExamples',
+ 'ch09_enhanced_prng.EnhancedPrngExamples',
+ 'ch10_deserialization_filters.DeserializationFilterExamples',
+ 'ch11_encapsulation.EncapsulationExamples',
+ 'ch12_foreign_function.ForeignFunctionExamples',
+ 'ch13_migration.MigrationGuideExamples',
+ 'ch14_bestpractices.Java17BestPracticesExamples'
+].each { cls ->
+    def taskName = 'run17' + cls.split('\\.')[1]
+    tasks.register(taskName, JavaExec) {
+        group = 'java17'
+        description = "Run Java 17 ${cls}"
+        classpath = sourceSets.main.runtimeClasspath
+        mainClass = "com.devopsmonk.java17.${cls}"
     }
 }
 
