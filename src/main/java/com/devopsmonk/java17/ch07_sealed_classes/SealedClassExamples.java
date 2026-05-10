@@ -13,8 +13,8 @@ public class SealedClassExamples {
 
     record Circle(double radius) implements Shape {}
     record Rectangle(double width, double height) implements Shape {}
-    // Triangle is non-sealed — anyone can extend it
-    non-sealed class Triangle implements Shape {
+    // Triangle is non-sealed — anyone can extend it (static so main() can instantiate it)
+    static non-sealed class Triangle implements Shape {
         final double base, height;
         Triangle(double base, double height) {
             this.base = base;
@@ -73,10 +73,9 @@ public class SealedClassExamples {
 
     static double processingFee(PaymentMethod method, double amount) {
         return switch (method) {
-            case CreditCard cc && cc.network().equals("AMEX") -> amount * 0.035;
-            case CreditCard cc                                   -> amount * 0.015;
-            case BankTransfer bt                                 -> 0.25;
-            case Crypto c                                        -> amount * 0.005;
+            case CreditCard cc   -> cc.network().equals("AMEX") ? amount * 0.035 : amount * 0.015;
+            case BankTransfer bt -> 0.25;
+            case Crypto c        -> amount * 0.005;
         };
     }
 

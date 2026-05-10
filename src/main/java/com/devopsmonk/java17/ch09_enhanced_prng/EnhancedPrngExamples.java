@@ -59,9 +59,9 @@ public class EnhancedPrngExamples {
         rng.ints(10, 1, 101).forEach(i -> System.out.print(i + " "));
         System.out.println();
 
-        // Gaussian stream — simulate sensor noise
+        // Gaussian values — nextGaussian() in a stream (gaussians() is Java 17.0.2+)
         System.out.print("5 Gaussian: ");
-        rng.gaussians(5).forEach(g -> System.out.printf("%.3f  ", g));
+        rng.doubles(5).map(d -> rng.nextGaussian()).forEach(g -> System.out.printf("%.3f  ", g));
         System.out.println();
     }
 

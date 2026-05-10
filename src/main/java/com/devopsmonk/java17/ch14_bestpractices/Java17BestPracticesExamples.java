@@ -147,8 +147,9 @@ public class Java17BestPracticesExamples {
     static void modernConcurrency() throws InterruptedException {
         System.out.println("\n=== Modern Concurrency Patterns ===");
 
-        // Structured executor — try-with-resources ensures shutdown
-        try (ExecutorService executor = Executors.newWorkStealingPool()) {
+        // ExecutorService.close() / try-with-resources only available from Java 19+
+        ExecutorService executor = Executors.newWorkStealingPool();
+        try {
             List<Future<String>> futures = IntStream.range(1, 6)
                 .mapToObj(i -> executor.submit(() -> {
                     Thread.sleep(ThreadLocalRandom.current().nextInt(50));
@@ -160,6 +161,8 @@ public class Java17BestPracticesExamples {
                 try { System.out.println("  " + f.get()); }
                 catch (Exception e) { System.out.println("  Error: " + e.getMessage()); }
             });
+        } finally {
+            executor.shutdown();
         }
     }
 
