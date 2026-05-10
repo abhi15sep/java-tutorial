@@ -152,11 +152,12 @@ public class PatternSwitchPreviewExamples {
         System.out.println("  " + describeJava16(null));
 
         System.out.println("\n=== Guarded Patterns (Java 16) ===");
-        List.of(-5, 0, 42, "  ", "Java 17", (Object) null)
+        // Arrays.asList — unlike List.of, it permits null elements
+        java.util.Arrays.asList(-5, 0, 42, "  ", "Java 17", null)
             .forEach(v -> System.out.println("  " + categoriseJava16(v)));
 
         System.out.println("\n=== Null Handling (Java 16) ===");
-        List.of("admin", "alice", "guest", (String) null)
+        java.util.Arrays.asList("admin", "alice", "guest", (String) null)
             .forEach(PatternSwitchPreviewExamples::nullHandlingJava16);
 
         System.out.println("\n=== Notifications (Java 16 instanceof chain) ===");
